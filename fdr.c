@@ -12,8 +12,6 @@
 
 void asm_fib_calc(int number);
 char * fibonacci(int number);
-long int roman_numeral_parser(char * rm_num);
-
 
 int main(int argc, char *argv[])
 {
