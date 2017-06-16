@@ -5,10 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <limits.h>
+#include <ctype.h>
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <openssl/bn.h>
 
 #include "roman_numeral.h"
 
@@ -58,7 +61,7 @@ int main(int argc, char *argv[])
     freeaddrinfo(results);
 
 	for(;;) {
-        char buf[256];
+        char buf[512];
         struct sockaddr_storage client;
         socklen_t client_sz = sizeof(client);
 
@@ -68,7 +71,7 @@ int main(int argc, char *argv[])
         if(received < 0) {
             perror("Problem receiving");
         }
-        if(received == 256) {
+        if(received == 512) {
             buf[received-1] = '\0';
         } else {
             buf[received] = '\0';
@@ -114,6 +117,7 @@ int main(int argc, char *argv[])
 
 char * fibonacci_parser(char * fib_number)
 {
+    char *buf = calloc(1, 128);
 
     int number = strtol(fib_number+1, NULL, 10);
 
@@ -129,7 +133,7 @@ char * fibonacci_parser(char * fib_number)
         "mov %3, r15"
         : "=r"(part1), "=r"(part2), "=r"(part3), "=r"(part4)
     );
-    char *buf = calloc(1, 128);
+
 	//Use string concats instead to avoid extra 0's
     if(part1 > 0) {
         snprintf(buf, 64, "0x%lx%lx%lx%lx", part1, part2, part3, part4);
@@ -149,19 +153,40 @@ char * fibonacci_parser(char * fib_number)
 
 char * roman_numeral_parser(char * rom_number)
 {
+    char *buf = calloc(1, 128);
+
     int number = roman_numeral_converter(rom_number+1);
     printf("%d\n", number);
 
-    char *buf = calloc(1, 128);
+
     snprintf(buf, 64, "%d", number);
     printf("%s\n", buf);
 
     return buf; 
 }
-char * hex_convert_parser(char * buf)
+char * hex_convert_parser(char * dec_number)
 {
-    printf("test: %s\n", buf+1);
-    buf[1] = '5';
+    BIGNUM *big_number;
+    big_number = BN_new();
 
-    return NULL;
+    BN_dec2bn(&big_number, dec_number+1);
+
+    char * hex_string;
+    hex_string = BN_bn2hex(big_number);
+    free(big_number);
+
+    size_t len = strlen(hex_string)+2;
+
+    char *buf = malloc(len);
+    buf[0] = '0';
+    buf[1] = 'x';
+    buf[2] = '\0';
+
+    strncat(buf, hex_string+1, len);
+    
+
+    //snprintf(buf, 128, "0x%s", hex_string+1);
+     
+    
+    return buf;
 }

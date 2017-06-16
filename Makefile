@@ -2,13 +2,13 @@ CPPFLAGS+=-Wall -Wextra -Wpedantic
 CPPFLAGS+=-Wwrite-strings -Wstack-usage=1024 -Wfloat-equal
 CPPFLAGS+=-Waggregate-return -Winline
 
-LDLIBS+=-lm
+LDLIBS+=-lm -lssl -lcrypto
 
 ASFLAGS += -W
 CFLAGS += -O1 -masm=intel -fno-asynchronous-unwind-tables -std=c11
 
 BIN=fdr
-OBJS=fdr.o fibonacci.o
+OBJS=fdr.o fibonacci.o roman_numeral.o
 
 .PHONY: clean debug profile
 
@@ -22,4 +22,4 @@ profile: LDFLAGS+=-pg
 profile: $(BIN)
 
 clean:
-	$(RM) $(OBJS) ($BIN)
+	$(RM) $(OBJS) $(BIN)
