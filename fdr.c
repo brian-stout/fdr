@@ -71,8 +71,6 @@ int main(int argc, char *argv[])
         }
 
 		printf("%s\n", buf);
-		long int number = strtol(buf, NULL, 10);
-		printf("%s\n", fibonacci(number));
 
 	}
 }
