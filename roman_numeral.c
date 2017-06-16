@@ -1,25 +1,4 @@
-
-#define _GNU_SOURCE
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
-int roman_character_value(char letter);
-int roman_numeral_parser(char * rmn_num);
-
-int main (void)
-{
-    char rmn_num[18];
-    printf("%zd\n", sizeof(rmn_num));
-    strncpy(rmn_num, "MMMDCCCCLXXXXVIIII", sizeof(rmn_num));
-    rmn_num[18] = '\0';
-	
-    printf("%s\n", rmn_num);
-    int number = roman_numeral_parser(rmn_num);
-    printf("%d\n", number);
-}
+#include "roman_numeral.h"
 
 int roman_character_value(char letter)
 {
@@ -44,7 +23,7 @@ int roman_character_value(char letter)
     }
 }
 
-int roman_numeral_parser(char * rmn_num)
+int roman_numeral_converter(char * rmn_num)
 {
     size_t len = strnlen(rmn_num, 18);
     if(len > 18)
