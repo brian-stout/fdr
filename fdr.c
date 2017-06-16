@@ -12,6 +12,8 @@
 
 void asm_fib_calc(int number);
 char * fibonacci(int number);
+long int roman_numeral_parser(char * rm_num);
+
 
 int main(int argc, char *argv[])
 {
@@ -60,10 +62,10 @@ int main(int argc, char *argv[])
 
         ssize_t received = recvfrom(sd, buf, sizeof(buf), 0,
                 (struct sockaddr *)&client, &client_sz);
+
         if(received < 0) {
             perror("Problem receiving");
         }
-
         if(received == 256) {
             buf[received-1] = '\0';
         } else {
@@ -71,7 +73,6 @@ int main(int argc, char *argv[])
         }
 
 		printf("%s\n", buf);
-
 	}
 }
 
