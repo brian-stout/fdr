@@ -7,7 +7,7 @@ LDLIBS+=-lm -lssl -lcrypto
 CFLAGS += -std=c11
 
 BIN=fdr
-OBJS=fdr.o fibonacci.o roman_numeral.o
+OBJS=fdr.o fibonacci.o roman_numeral.o parsers.o
 
 .PHONY: clean debug profile
 
