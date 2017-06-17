@@ -14,19 +14,14 @@
 #include <openssl/bn.h>
 
 #include "roman_numeral.h"
+#include "fibonacci.h"
 
-void asm_fib_calc(int number);
 char * fibonacci_parser(char * buf);
 char * roman_numeral_parser(char * buf);
 char * hex_convert_parser(char * buf);
 
-int main(int argc, char *argv[])
+int main(void)
 {
-    if(argc != 2) {
-        fprintf(stderr, "%s <IP>\n", argv[0]);
-        return 1;
-    }
-
     // Port numbers are in the range 1-65535, plus null byte
     char port_num[8];
     snprintf(port_num, sizeof(port_num), "%hu", getuid());
@@ -37,7 +32,7 @@ int main(int argc, char *argv[])
     hints.ai_family = PF_UNSPEC;
     hints.ai_socktype = SOCK_DGRAM;
 
-    int err = getaddrinfo(argv[1], port_num, &hints, &results);
+    int err = getaddrinfo("localhost", port_num, &hints, &results);
     if(err != 0) {
         fprintf(stderr, "Could not parse address: %s\n", gai_strerror(err));
         return 2;
@@ -61,7 +56,7 @@ int main(int argc, char *argv[])
     freeaddrinfo(results);
 
 	for(;;) {
-        char buf[512];
+        char buf[256];
         struct sockaddr_storage client;
         socklen_t client_sz = sizeof(client);
 
@@ -71,7 +66,7 @@ int main(int argc, char *argv[])
         if(received < 0) {
             perror("Problem receiving");
         }
-        if(received == 512) {
+        if(received == 256) {
             buf[received-1] = '\0';
         } else {
             buf[received] = '\0';
@@ -98,9 +93,11 @@ int main(int argc, char *argv[])
             default:
                 printf("Error!\n");
         }
+
         size_t len = strlen(func_ret);
         strncpy(buf, func_ret, len);
         free(func_ret);
+
 
         buf[len] = '\n';
         buf[len+1] = '\0';
@@ -110,43 +107,24 @@ int main(int argc, char *argv[])
         {
             perror("Invalid Send");
         }
-
-
 	}
 }
 
 char * fibonacci_parser(char * fib_number)
 {
-    char *buf = calloc(1, 128);
-
     int number = strtol(fib_number+1, NULL, 10);
+    BIGNUM * big_number;
+    big_number = BN_fibonacci(number);
+    char * hex_string;
+    hex_string = BN_bn2hex(big_number);
+    size_t len = strlen(hex_string)+2;
+    char *buf = malloc(len);
+    buf[0] = '0';
+    buf[1] = 'x';
+    buf[2] = '\0';
 
-    unsigned long part1 = 0, part2 = 0, part3 = 0, part4 = 0;
-	asm_fib_calc(number);
-	//Cuillo helped here
-	//TODO: Figure out stack arguments, and call snprintf in function and pass
-	//			address
-    __asm__(
-        "mov %0, r12\n"
-        "mov %1, r13\n"
-        "mov %2, r14\n"
-        "mov %3, r15"
-        : "=r"(part1), "=r"(part2), "=r"(part3), "=r"(part4)
-    );
-
-	//Use string concats instead to avoid extra 0's
-    if(part1 > 0) {
-        snprintf(buf, 64, "0x%lx%lx%lx%lx", part1, part2, part3, part4);
-    } else if(part2 > 0) {
-        snprintf(buf, 64, "0x%lx%lx%lx", part2, part3, part4);
-    } else if(part3 > 0) {
-        snprintf(buf, 64, "0x%lx%lx", part3, part4);
-    } else if(part4 > 0) {
-        snprintf(buf, 64, "0x%lx", part4);
-    } else {
-        snprintf(buf, 64, "0x0");
-    }
-
+    strncat(buf, hex_string, len);
+    free(hex_string);
 
     return buf;
 }
@@ -156,10 +134,8 @@ char * roman_numeral_parser(char * rom_number)
     char *buf = calloc(1, 128);
 
     int number = roman_numeral_converter(rom_number+1);
-    printf("%d\n", number);
 
-
-    snprintf(buf, 64, "%d", number);
+    snprintf(buf, 64, "0x%x", number);
     printf("%s\n", buf);
 
     return buf; 
@@ -173,7 +149,7 @@ char * hex_convert_parser(char * dec_number)
 
     char * hex_string;
     hex_string = BN_bn2hex(big_number);
-    free(big_number);
+    BN_free(big_number);
 
     size_t len = strlen(hex_string)+2;
 
@@ -183,10 +159,7 @@ char * hex_convert_parser(char * dec_number)
     buf[2] = '\0';
 
     strncat(buf, hex_string+1, len);
-    
+    free(hex_string);
 
-    //snprintf(buf, 128, "0x%s", hex_string+1);
-     
-    
     return buf;
 }

@@ -4,8 +4,7 @@ CPPFLAGS+=-Waggregate-return -Winline
 
 LDLIBS+=-lm -lssl -lcrypto
 
-ASFLAGS += -W
-CFLAGS += -O1 -masm=intel -fno-asynchronous-unwind-tables -std=c11
+CFLAGS += -std=c11
 
 BIN=fdr
 OBJS=fdr.o fibonacci.o roman_numeral.o
