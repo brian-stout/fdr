@@ -22,6 +22,7 @@ char * fibonacci_parser(char * buf);
 char * roman_numeral_parser(char * buf);
 char * hex_convert_parser(char * buf);
 void signal_handler(int signal);
+void null_terminator(char * buf);
 
 int create_server_fork(char * port_num);
 
@@ -103,8 +104,24 @@ void signal_handler(int signal)
     }
 }
 
+void null_terminator(char * buf)
+{
+        int len = strlen(buf);
+
+        for(int i = 0; i < len; i++)
+        {
+            if (buf[i] == '\n') {
+                buf[i] = '\0';
+            }
+        }
+}
+
 int create_server_fork(char * port_num)
 {
+    const char * host = "tooldev";
+
+    printf("Intializing server on port %s at host %s \n", port_num, host);
+
     //Creating signal handler to catch interrupts
     //TODO: Throw in function and pass PID so it makes sense.  Possibly find a way
     //          to do a clean exit to make sure we can valgrind everything
@@ -130,7 +147,7 @@ int create_server_fork(char * port_num)
     hints.ai_socktype = SOCK_DGRAM;
 
     //Localhost is the default
-    int err = getaddrinfo("localhost", port_num, &hints, &results);
+    int err = getaddrinfo(host, port_num, &hints, &results);
     if(err != 0) {
         fprintf(stderr, "Could not parse address: %s\n", gai_strerror(err));
         return 2;
@@ -181,6 +198,8 @@ int create_server_fork(char * port_num)
         //Going to assign a string to a point as a return since the fib parser
         //  won't rewrite buff properly and can't return an array type
         char * func_ret = NULL;
+
+        null_terminator(buf);
 
         switch(buf[0])
         {
