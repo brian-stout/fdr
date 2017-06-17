@@ -117,14 +117,17 @@ char * fibonacci_parser(char * fib_number)
     big_number = BN_fibonacci(number);
     char * hex_string;
     hex_string = BN_bn2hex(big_number);
-    size_t len = strlen(hex_string)+2;
+    BN_free(big_number);
+
+    size_t len = strlen(hex_string) + 3;
+
     char *buf = malloc(len);
     buf[0] = '0';
     buf[1] = 'x';
     buf[2] = '\0';
 
     strncat(buf, hex_string, len);
-    free(hex_string);
+    OPENSSL_free(hex_string);
 
     return buf;
 }
@@ -159,7 +162,7 @@ char * hex_convert_parser(char * dec_number)
     buf[2] = '\0';
 
     strncat(buf, hex_string+1, len);
-    free(hex_string);
+    OPENSSL_free(hex_string);
 
     return buf;
 }
