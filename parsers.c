@@ -31,7 +31,7 @@ char * fibonacci_parser(char * fib_number)
         //  for unknown reasons, probably the stdin new line
         if(endptr[0] == 0) {
             //Resetting to null just to be sure
-            endptr = NULL; 
+            endptr = NULL;
             //If it gets here, the data is invalid
         } else {
             return NULL;
@@ -96,7 +96,7 @@ char * roman_numeral_parser(char * rom_number)
     //Using snprintf to format the string
     snprintf(buf, 8, "0x%x", number);
 
-    return buf; 
+    return buf;
 }
 char * hex_convert_parser(char * dec_number)
 {
@@ -125,9 +125,9 @@ char * hex_convert_parser(char * dec_number)
         buf[0] = '0';
         buf[1] = 'x';
         buf[2] = '0';
-        buf[3] = '\0';    
+        buf[3] = '\0';
         BN_free(big_number);
-        return buf;    
+        return buf;
     }
     //The max number 10^20 is 21 digits long, if it exceeds this it exceeds the range
     if(length > 21) {
@@ -144,8 +144,8 @@ char * hex_convert_parser(char * dec_number)
             if((dec_number[i] - '0') > 0) {
                 BN_free(big_number);
                 return NULL;
-            }  
-        }        
+            }
+        }
     }
 
     //If all that's good convert it to a hex string
@@ -160,8 +160,6 @@ char * hex_convert_parser(char * dec_number)
     snprintf(buf, 8, "0x%s", hex_string);
 
     OPENSSL_free(hex_string);
-
-    
 
     return buf;
 }

@@ -97,7 +97,6 @@ void signal_handler(int signal)
     }
 }
 
-
 int create_server_fork(char * port_num)
 {
     const char * host = "tooldev";
@@ -120,7 +119,7 @@ int create_server_fork(char * port_num)
     }
     if(sigaction(SIGINT, &sa, NULL) == -1) {
         perror("Error on SIGINT\n");
-    }  
+    }
 
     //A lot of this code is repurposed from the classes' example of a UDP server
     struct addrinfo *results;
@@ -155,7 +154,7 @@ int create_server_fork(char * port_num)
     freeaddrinfo(results);
 
     //Infinite receive and send loop.  Main server functions
-	for(;;) {
+    for(;;) {
         //buffer to store received data from
         char buf[256];
         struct sockaddr_storage client;
@@ -236,6 +235,6 @@ int create_server_fork(char * port_num)
         {
             perror("Invalid Send");
         }
-	}
+    }
 }
 

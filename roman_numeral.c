@@ -70,7 +70,7 @@ int roman_numeral_converter(char * rmn_num)
             }
         //If it's not the same then reset the count
         } else {
-            four_char_count = 0;  
+            four_char_count = 0;
         }
 
         //If the next value is bigger than the last, the characters are out of order

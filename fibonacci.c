@@ -16,7 +16,7 @@ BIGNUM * BN_fibonacci(int number)
     for(int i = 0; i < number + 1; i++)
     {
         if(i == 0) {
-            BN_zero(next);            
+            BN_zero(next);
         } else if (i == 1) {
             BN_one(next);
         //Main fibonacci sequence
