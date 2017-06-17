@@ -4,18 +4,25 @@ int roman_character_value(char letter)
 {
     switch(letter)
     {
+        case 'm':
         case 'M':
             return 1000;
+        case 'd':
         case 'D':
             return 500;
+        case 'c':
         case 'C':
             return 100;
+        case 'l':
         case 'L':
             return 50;
+        case 'x':
         case 'X':
             return 10;
+        case 'v':
         case 'V':
             return 5;
+        case 'i':
         case 'I':
             return 1;
         default:
