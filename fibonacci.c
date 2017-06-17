@@ -2,12 +2,9 @@
 
 BIGNUM * BN_fibonacci(int number)
 {
-
-
     BIGNUM * prev = BN_new();
     BIGNUM * current = BN_new();
     BIGNUM * next = BN_new();
-
 
     BN_zero(prev);
     BN_one(current);

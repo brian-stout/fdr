@@ -26,12 +26,10 @@ int roman_character_value(char letter)
 int roman_numeral_converter(char * rmn_num)
 {
     size_t len = strnlen(rmn_num, 18);
-    if(len > 18)
-    {
+    if(len > 18) {
         return -1;
     }
-    if(len == 1)
-    {
+    if(len == 1) {
         return 0;
     }
 
@@ -59,15 +57,13 @@ int roman_numeral_converter(char * rmn_num)
             four_char_count = 0;  
         }
 
-        if (addition > last_val)
-        {
+        if (addition > last_val) {
             ret_num = -1;
             break;
         }
         last_val = addition;
 
-        if (addition == 0)
-        {
+        if (addition == 0) {
             ret_num = -1;
             break;
         }
