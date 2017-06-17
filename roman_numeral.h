@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 int roman_character_value(char letter);
 int roman_numeral_converter(char * rmn_num);

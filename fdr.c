@@ -8,9 +8,11 @@
 #include <limits.h>
 #include <ctype.h>
 
+#include <stdbool.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <openssl/bn.h>
 
 #include "roman_numeral.h"
@@ -19,13 +21,101 @@
 char * fibonacci_parser(char * buf);
 char * roman_numeral_parser(char * buf);
 char * hex_convert_parser(char * buf);
+void signal_handler(int signal);
+
+int create_server_fork(char * port_num);
 
 int main(void)
 {
     // Port numbers are in the range 1-65535, plus null byte
     char port_num[8];
-    snprintf(port_num, sizeof(port_num), "%hu", getuid());
-    printf("%hu\n", getuid());
+
+    //Grab userid to use different ports
+    uid_t uid = getuid();
+
+    //converts the uid to a string to be used for the socket
+    snprintf(port_num, sizeof(port_num), "%hu", uid);
+
+    //Variable used to prevent child processes from forking their own children
+    bool is_child = false;
+
+    //TODO: Grab all the PIDs into a PID array to run a infinite loop on waiting for
+    //      exits instead of just one child process for more stability.
+    pid_t pid = fork();
+    
+    if(pid == 0) {
+        create_server_fork(port_num);
+        is_child = true;
+    } else if (pid < 0) {
+        perror("Fork Error!\n");
+    }
+
+    if(is_child == false) {
+        pid = fork();
+        if(pid == 0) {
+            is_child = true;
+            snprintf(port_num, sizeof(port_num), "%hu", uid + 1000);
+            create_server_fork(port_num);
+        } else if (pid < 0) {
+            perror("Fork Error!\n");
+        }
+    }
+
+    if(is_child == false) {
+        pid = fork();
+
+        if(pid == 0) {
+            is_child = true;
+            snprintf(port_num, sizeof(port_num), "%hu", uid + 2000);
+            create_server_fork(port_num);
+        } else if (pid < 0) {
+            perror("Fork Error!\n");
+        }
+    }
+
+    int status;
+    pid = wait(&status);
+    printf("Child with PID %ld exited with status 0x%x.\n", (long)pid, status);
+
+
+}
+
+void signal_handler(int signal)
+{
+    switch(signal) {
+        case SIGINT:
+            //Ctrl+C will exit normally
+            write(0, "Received SIGINT, exiting fork\n", 30);
+            exit(0);
+        case SIGTERM:
+            write(0, "Received SIGTERM, exiting fork\n", 31);
+            exit(0);
+        default:
+            //Should never happen
+            write(0, "Bad Signal", 10);
+            return;
+    }
+}
+
+int create_server_fork(char * port_num)
+{
+    //Creating signal handler to catch interrupts
+    //TODO: Throw in function and pass PID so it makes sense.  Possibly find a way
+    //          to do a clean exit to make sure we can valgrind everything
+    struct sigaction sa;
+
+    sa.sa_handler = signal_handler;
+    sa.sa_flags = 0;
+    sigemptyset(&sa.sa_mask);
+
+    //Checking for errors via the signals
+
+    if(sigaction(SIGTERM, &sa, NULL) == -1) {
+        perror("Error on SIGHTERM\n");
+    }
+    if(sigaction(SIGINT, &sa, NULL) == -1) {
+        perror("Error on SIGINT\n");
+    }  
 
     struct addrinfo *results;
     struct addrinfo hints = {0};
@@ -93,6 +183,9 @@ int main(void)
             default:
                 printf("Error!\n");
         }
+        if(func_ret == NULL) {
+            continue;
+        }
 
         size_t len = strlen(func_ret);
         strncpy(buf, func_ret, len);
@@ -112,7 +205,30 @@ int main(void)
 
 char * fibonacci_parser(char * fib_number)
 {
-    int number = strtol(fib_number+1, NULL, 10);
+    if(fib_number[1] == '-') {
+        printf("Exiting!\n");
+        return NULL;
+    }
+    char * endptr = NULL;
+
+    int number = strtol(fib_number+1, &endptr, 10);
+
+    if(endptr) {
+        if(endptr[0] == 0) {
+            endptr = NULL;
+        } else {
+            printf("%d\n", endptr[0]);
+            return NULL;
+        }
+    }
+
+    if(number < 0) {
+        return NULL;
+    }
+    if(number > 300) {
+        return NULL;
+    }
+
     BIGNUM * big_number;
     big_number = BN_fibonacci(number);
     char * hex_string;
@@ -137,6 +253,9 @@ char * roman_numeral_parser(char * rom_number)
     char *buf = calloc(1, 128);
 
     int number = roman_numeral_converter(rom_number+1);
+    if(number < 0 || number > 4000) {
+        return NULL;
+    }
 
     snprintf(buf, 64, "0x%x", number);
     printf("%s\n", buf);
@@ -146,9 +265,19 @@ char * roman_numeral_parser(char * rom_number)
 char * hex_convert_parser(char * dec_number)
 {
     BIGNUM *big_number;
+
     big_number = BN_new();
 
-    BN_dec2bn(&big_number, dec_number+1);
+    int length = 0;
+    length = BN_dec2bn(&big_number, dec_number+1);
+    if(length == 0) {
+        return NULL;
+    }
+    if(length >= 21) {
+        if ((dec_number[21] - '0') != 0) {
+            return NULL;
+        }
+    }
 
     char * hex_string;
     hex_string = BN_bn2hex(big_number);

@@ -30,14 +30,35 @@ int roman_numeral_converter(char * rmn_num)
     {
         return -1;
     }
+    if(len == 1)
+    {
+        return 0;
+    }
 
     int ret_num = 0;
     int addition = 0;
-    int last_val = 1000;
+    int last_val = 1001;
+
+    int four_char_count = 0;
 
     for(size_t i = 0; i < len; i++)
     {
         addition = roman_character_value(rmn_num[i]);
+        if (addition == last_val) {
+            if (addition == 500 || addition == 50 || addition == 5) {
+                ret_num = -1;
+                break;
+            } else {
+                four_char_count++;
+                if(four_char_count == 4) {
+                    ret_num = -1;
+                    break;
+                }
+            }    
+        } else {
+            four_char_count = 0;  
+        }
+
         if (addition > last_val)
         {
             ret_num = -1;
